@@ -1,0 +1,36 @@
+name: Release Client
+
+on:
+  push:
+    tags:
+      - 'client-v*'
+
+jobs:
+  publish-openupm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract version
+        id: ver
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#client-v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing client version $VERSION"
+      - name: Update package.json version
+        run: |
+          # OpenUPM / UPM expects version in package.json
+          python3 -c "
+          import json, pathlib
+          p = pathlib.Path('client/com.company.bugreport/package.json')
+          data = json.loads(p.read_text())
+          data['version'] = '${{ steps.ver.outputs.version }}'
+          p.write_text(json.dumps(data, indent=2) + '\n')
+          "
+      - name: Publish to OpenUPM (placeholder)
+        env:
+          OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
+        run: |
+          echo "Submit client/com.company.bugreport path to OpenUPM with tag client-v${{ steps.ver.outputs.version }}"
+          echo "Configure OPENUPM_TOKEN and your OpenUPM package submission flow here."
+          # Example: openupm-cli or automated PR to openupm/openupm

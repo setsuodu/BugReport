@@ -1,0 +1,361 @@
+openapi: 3.0.3
+info:
+  title: BugReport API
+  version: 1.0.0
+  description: BugReport service – client ingest and dashboard query APIs
+servers:
+  - url: /api/v1
+    description: API base
+
+paths:
+  /ingest/reports:
+    post:
+      summary: Submit a bug/crash report from client
+      operationId: ingestReport
+      security:
+        - IngestApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportIngest'
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestAccepted'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+
+  /ingest/attachments/init:
+    post:
+      summary: Initialize multipart attachment upload
+      operationId: initAttachment
+      security:
+        - IngestApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachmentInitRequest'
+      responses:
+        '200':
+          description: Upload session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentInitResponse'
+        '401':
+          description: Unauthorized
+
+  /ingest/attachments/complete:
+    post:
+      summary: Complete multipart attachment upload
+      operationId: completeAttachment
+      security:
+        - IngestApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachmentCompleteRequest'
+      responses:
+        '200':
+          description: Attachment finalized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachmentCompleteResponse'
+        '401':
+          description: Unauthorized
+
+  /reports:
+    get:
+      summary: List reports (Dashboard)
+      operationId: listReports
+      security:
+        - AdminApiKey: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ReportStatus'
+        - name: projectId
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Paged list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportListResponse'
+        '401':
+          description: Unauthorized
+
+  /reports/{id}:
+    get:
+      summary: Get report detail
+      operationId: getReport
+      security:
+        - AdminApiKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Report detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetail'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+
+  /reports/{id}/status:
+    patch:
+      summary: Update report status
+      operationId: updateReportStatus
+      security:
+        - AdminApiKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusUpdateRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetail'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+
+components:
+  securitySchemes:
+    IngestApiKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: Project ingest API key
+    AdminApiKey:
+      type: apiKey
+      in: header
+      name: X-Admin-Api-Key
+      description: Admin / Dashboard API key
+
+  schemas:
+    ReportStatus:
+      type: string
+      enum: [Open, Fixed, Closed]
+
+    ReportIngest:
+      type: object
+      required: [projectId, clientReportId, level, message, occurredAt]
+      properties:
+        projectId:
+          type: string
+        clientReportId:
+          type: string
+          description: Client-generated unique id for dedup
+        level:
+          type: string
+          enum: [Error, Exception, Crash, Warning, Info]
+        message:
+          type: string
+        stackTrace:
+          type: string
+          nullable: true
+        deviceInfo:
+          $ref: '#/components/schemas/DeviceInfo'
+        appVersion:
+          type: string
+          nullable: true
+        occurredAt:
+          type: string
+          format: date-time
+        customData:
+          type: object
+          additionalProperties: true
+          nullable: true
+        attachmentIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+
+    DeviceInfo:
+      type: object
+      properties:
+        platform:
+          type: string
+        osVersion:
+          type: string
+        deviceModel:
+          type: string
+        deviceId:
+          type: string
+          nullable: true
+
+    IngestAccepted:
+      type: object
+      properties:
+        reportId:
+          type: string
+          format: uuid
+        accepted:
+          type: boolean
+
+    AttachmentInitRequest:
+      type: object
+      required: [projectId, fileName, contentType, sizeBytes]
+      properties:
+        projectId:
+          type: string
+        fileName:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+          format: int64
+
+    AttachmentInitResponse:
+      type: object
+      properties:
+        attachmentId:
+          type: string
+          format: uuid
+        uploadUrl:
+          type: string
+          description: Pre-signed or direct upload URL (S3-compatible)
+        expiresAt:
+          type: string
+          format: date-time
+
+    AttachmentCompleteRequest:
+      type: object
+      required: [attachmentId]
+      properties:
+        attachmentId:
+          type: string
+          format: uuid
+        etag:
+          type: string
+          nullable: true
+
+    AttachmentCompleteResponse:
+      type: object
+      properties:
+        attachmentId:
+          type: string
+          format: uuid
+        url:
+          type: string
+        completed:
+          type: boolean
+
+    ReportSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+        level:
+          type: string
+        message:
+          type: string
+        status:
+          $ref: '#/components/schemas/ReportStatus'
+        occurredAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        appVersion:
+          type: string
+          nullable: true
+
+    ReportDetail:
+      allOf:
+        - $ref: '#/components/schemas/ReportSummary'
+        - type: object
+          properties:
+            stackTrace:
+              type: string
+              nullable: true
+            deviceInfo:
+              $ref: '#/components/schemas/DeviceInfo'
+            customData:
+              type: object
+              additionalProperties: true
+              nullable: true
+            attachmentIds:
+              type: array
+              items:
+                type: string
+            clientReportId:
+              type: string
+
+    ReportListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportSummary'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+
+    StatusUpdateRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/ReportStatus'
