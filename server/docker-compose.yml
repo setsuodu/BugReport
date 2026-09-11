@@ -1,36 +1,37 @@
-# Visual Studio / CLI: run from server/ directory
+# From server/:
+#   cp .env.example .env   # first time
 #   docker compose up -d --build
 #
-# Host port plan (company-wide, avoid classic 8080/5432/6379/9000):
-#   bugreport-server  12080 → 8080
-#   bugreport-db      12032 → 5432
-#   minio S3          12090 → 9000
-#   minio console     12091 → 9001
+# Host ports (component zone 120xx):
+#   API 12080 | Postgres 12032 | MinIO S3 12090 | MinIO Console 12091
+#
+# Secrets live in .env (see .env.example). Do not commit .env.
 
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: bugreport
-      POSTGRES_PASSWORD: bugreport
-      POSTGRES_DB: bugreport
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - bugreport_pgdata:/var/lib/postgresql/data
     ports:
       - "12032:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bugreport -d bugreport"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
 
-  # S3-compatible object storage for report attachments.
   minio:
     image: minio/minio:latest
-    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     ports:
       - "12090:9000"
       - "12091:9001"
@@ -41,34 +42,51 @@ services:
     image: minio/mc:latest
     depends_on:
       - minio
-    entrypoint: >
-      /bin/sh -c "
-      sleep 3;
-      mc alias set local http://minio:9000 minioadmin minioadmin;
-      mc mb -p local/bugreport-attachments || true;
-      mc anonymous set download local/bugreport-attachments || true;
-      exit 0;
-      "
+    restart: "no"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "Waiting for MinIO..."
+        for i in $$(seq 1 30); do
+          if mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD" 2>/dev/null; then
+            if mc ready local 2>/dev/null; then
+              break
+            fi
+          fi
+          echo "  retry $$i/30..."
+          sleep 2
+        done
+        mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
+        mc mb -p "local/$$MINIO_BUCKET" || true
+        mc anonymous set download "local/$$MINIO_BUCKET" || true
+        echo "MinIO bucket ready."
+        exit 0
 
   bugreport-server:
     build:
       context: ..
       dockerfile: server/src/BugReport.Server.Api/Dockerfile
     image: bugreport-server:local
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
       minio-init:
         condition: service_completed_successfully
     environment:
-      ConnectionStrings__Postgres: Host=db;Port=5432;Database=bugreport;Username=bugreport;Password=bugreport
+      ConnectionStrings__Postgres: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Storage__Endpoint: http://minio:9000
-      Storage__Bucket: bugreport-attachments
-      Storage__AccessKey: minioadmin
-      Storage__SecretKey: minioadmin
+      Storage__Bucket: ${MINIO_BUCKET}
+      Storage__AccessKey: ${MINIO_ROOT_USER}
+      Storage__SecretKey: ${MINIO_ROOT_PASSWORD}
       Storage__ForcePathStyle: "true"
-      Auth__IngestApiKey: dev-ingest-key
-      Auth__AdminApiKey: dev-admin-key
+      Auth__IngestApiKey: ${AUTH_INGEST_API_KEY}
+      Auth__AdminApiKey: ${AUTH_ADMIN_API_KEY}
       ASPNETCORE_URLS: http://+:8080
     ports:
       - "12080:8080"

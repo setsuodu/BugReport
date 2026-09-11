@@ -1,4 +1,4 @@
-# Example compose for integrators – change secrets/config only, no code changes required.
+# Integrator example — host ports follow company plan (120xx component zone).
 services:
   db:
     image: postgres:16-alpine
@@ -9,14 +9,13 @@ services:
     volumes:
       - bugreport_pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "12032:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U bugreport"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-  # Optional local object storage (MinIO). Point Storage__* at your cloud OSS/S3 instead if preferred.
   minio:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
@@ -24,13 +23,13 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "12090:9000"
+      - "12091:9001"
     volumes:
       - bugreport_minio:/data
 
   bugreport-server:
-    image: ghcr.io/setsuodu/bugreport-server:1.0.0
+    image: ghcr.io/<org>/bugreport-server:1.0.0
     depends_on:
       db:
         condition: service_healthy
@@ -45,7 +44,7 @@ services:
       - Auth__AdminApiKey=change-me-admin
       - ASPNETCORE_URLS=http://+:8080
     ports:
-      - "8080:8080"
+      - "12080:8080"
 
 volumes:
   bugreport_pgdata:
