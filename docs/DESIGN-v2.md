@@ -1,4 +1,4 @@
-[← 返回文档中心](README.md) | [客户端部署](client-deployment.md) | [服务器部署](server-deployment.md)
+[← 返回文档中心](../README.md) | [客户端部署](client-deployment.md) | [服务器部署](server-deployment.md)
 
 # BugReport 服务 设计文档 v2
 

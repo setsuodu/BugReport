@@ -1,6 +1,6 @@
 # 客户端部署指南
 
-[← 返回文档中心](README.md)
+[← 返回文档中心](../README.md)
 
 Unity 端以 UPM 包形式提供，路径为 `client/Packages/com.setsuodu.bugreport`。
 
@@ -89,4 +89,4 @@ Sample 说明见包内 `Samples~/BasicSetup`。
 - 客户端 DTO 与服务端手动对齐，协议变更请先改 `shared/openapi.yaml`
 - 附件上传接口已预留，当前客户端版本以报告正文为主
 
-[← 返回文档中心](README.md)
+[← 返回文档中心](../README.md)

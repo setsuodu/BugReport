@@ -1,6 +1,6 @@
 # 服务器部署指南
 
-[← 返回文档中心](README.md)
+[← 返回文档中心](../README.md)
 
 服务端为 .NET 10 Minimal API + Native AOT，唯一正式产物是 Docker 镜像。
 
@@ -141,4 +141,4 @@ A: 将 DbUp 逻辑移出启动路径，做成独立 Job。
 
 更多设计细节见 [设计文档 v2](DESIGN-v2.md)。
 
-[← 返回文档中心](README.md)
+[← 返回文档中心](../README.md)
