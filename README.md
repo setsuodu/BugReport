@@ -15,10 +15,9 @@ Unity 客户端上报 + .NET 10 服务端接收/查询的 Bug/Crash 报告服务
 | 文档 | 说明 |
 |------|------|
 | [主页介绍](README.md) | 项目概览、仓库结构、API 功能表、发布说明 |
-| [客户端部署](client-deployment.md) | Unity 包安装、配置、接入步骤 |
-| [服务器部署](server-deployment.md) | 本地运行、Docker Compose、环境变量、端口规划 |
-| [设计文档 v2](DESIGN-v2.md) | 详细设计（技术选型、AOT、CI/CD、待办） |
-| [端口规划](PORT_PLAN.md) | 公司宿主机端口分段（组件区 120xx） |
+| [客户端部署](docs/client-deployment.md) | Unity 包安装、配置、接入步骤 |
+| [服务器部署](docs/server-deployment.md) | 本地运行、Docker Compose、环境变量、端口规划 |
+| [设计文档 v2](docs/DESIGN-v2.md) | 详细设计（技术选型、AOT、CI/CD、待办） |
 
 ---
 
@@ -65,9 +64,8 @@ BugReport/
 
 | Tag | 触发工作流 | 产物 |
 |-----|------------|------|
-| `client-vX.Y.Z` | release-client | OpenUPM 客户端包 |
+| 不打tag | 外部触发 | OpenUPM 客户端包 |
 | `server-vX.Y.Z` | release-server | GHCR 镜像 `bugreport-server:X.Y.Z` |
-| `vX.Y.Z` | release-all | 客户端 + 服务端联合发布 |
 
 ---
 
@@ -76,4 +74,3 @@ BugReport/
 - [客户端部署指南](docs/client-deployment.md)
 - [服务器部署指南](docs/server-deployment.md)
 - [设计文档 v2](docs/DESIGN-v2.md)
-- [OpenAPI 契约](shared/openapi.yaml)
