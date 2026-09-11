@@ -1,83 +1,79 @@
-# BugReport
+# BugReport 文档中心
 
 Unity 客户端上报 + .NET 10 服务端接收/查询的 Bug/Crash 报告服务。
 
-- **客户端**：Unity UPM 包（OpenUPM 子目录发布）
-- **服务端**：ASP.NET Core Minimal API，Native AOT，唯一产物为 Docker 镜像（GHCR）
+- **客户端**：Unity UPM 包（`client/Packages/com.setsuodu.bugreport`）
+- **服务端**：ASP.NET Core Minimal API，Native AOT，产物为 Docker 镜像（GHCR）
 - **不含**：Dashboard 前端、IM 通知集成
 
-设计文档见仓库内原始需求与 `docs/`。
+完整协议见仓库根目录 `shared/openapi.yaml`。
+
+---
+
+## 文档导航
+
+| 文档 | 说明 |
+|------|------|
+| [主页介绍](README.md) | 项目概览、仓库结构、API 功能表、发布说明 |
+| [客户端部署](client-deployment.md) | Unity 包安装、配置、接入步骤 |
+| [服务器部署](server-deployment.md) | 本地运行、Docker Compose、环境变量、端口规划 |
+| [设计文档 v2](DESIGN-v2.md) | 详细设计（技术选型、AOT、CI/CD、待办） |
+| [端口规划](PORT_PLAN.md) | 公司宿主机端口分段（组件区 120xx） |
+
+---
 
 ## 仓库结构
 
 ```
 BugReport/
-├── client/com.setsuodu.bugreport/   # Unity UPM 包
-├── server/src/BugReport.Server.Api/ # .NET 10 API（AOT）
-├── shared/openapi.yaml             # 协议唯一事实来源
-├── deploy/docker-compose.example.yml
-└── .github/workflows/              # CI + 按 tag 发布
+├── client/
+│   └── Packages/com.setsuodu.bugreport/   # Unity UPM 包（实际路径）
+├── server/src/BugReport.Server.Api/       # .NET 10 API（AOT）
+├── shared/openapi.yaml                    # 协议唯一事实来源
+├── deploy/docker-compose.example.yml      # 接入示例
+├── docs/                                  # 本文档
+└── .github/workflows/                     # CI + 按 tag 发布
 ```
 
-## 快速开始（服务端本地）
+> **注意**：README 旧版写的是 `client/com.setsuodu.bugreport/`，实际包位于 `client/Packages/com.setsuodu.bugreport/`。
 
-```bash
-# 需要 .NET 10 SDK + PostgreSQL
-export ConnectionStrings__Postgres="Host=localhost;Port=5432;Database=bugreport;Username=...;Password=..."
-export Auth__IngestApiKey=dev-ingest-key
-export Auth__AdminApiKey=dev-admin-key
+---
 
-cd server
-dotnet run --project src/BugReport.Server.Api
-# → http://localhost:8080/health
-```
+## API 功能表
 
-或使用示例 Compose（替换镜像名与密钥）：
+完整契约以 `shared/openapi.yaml` 为准。所有业务接口前缀为 `/api/v1`（健康检查除外）。
 
-```bash
-# 先构建镜像或改 image 为本地 build
-docker compose -f deploy/docker-compose.example.yml up
-```
+| 方法 | 路径 | 鉴权 | 功能说明 |
+|------|------|------|----------|
+| GET | `/health` | 无 | 健康检查，返回 `{ "status": "ok" }` |
+| POST | `/api/v1/ingest/reports` | `X-Api-Key`（项目 Ingest Key） | 客户端提交 Bug/Crash 报告 |
+| POST | `/api/v1/ingest/attachments/init` | 同上 | 初始化附件分片上传，返回预签名 URL |
+| POST | `/api/v1/ingest/attachments/complete` | 同上 | 完成附件上传，返回最终 URL |
+| GET | `/api/v1/reports` | `X-Admin-Api-Key` | 分页列表查询（支持 status / projectId 过滤） |
+| GET | `/api/v1/reports/{id}` | 同上 | 获取单条报告详情 |
+| PATCH | `/api/v1/reports/{id}/status` | 同上 | 更新状态（Open / Fixed / Closed） |
 
-## API 摘要
+### 鉴权说明
 
-| 方法 | 路径 | 鉴权 |
-|------|------|------|
-| POST | `/api/v1/ingest/reports` | `X-Api-Key`（项目 Key） |
-| POST | `/api/v1/ingest/attachments/init` | 同上 |
-| POST | `/api/v1/ingest/attachments/complete` | 同上 |
-| GET  | `/api/v1/reports` | `X-Admin-Api-Key` |
-| GET  | `/api/v1/reports/{id}` | 同上 |
-| PATCH| `/api/v1/reports/{id}/status` | 同上 |
+- **Ingest（客户端上报）**：Header `X-Api-Key`
+- **Admin（Dashboard 查询）**：Header `X-Admin-Api-Key`
+- 两个 Key 在服务端配置中独立设置，互不通用。
 
-完整契约：`shared/openapi.yaml`。
+---
 
-## 发布 Tag
+## 发布 Tag 策略
 
-| Tag | 产物 |
-|-----|------|
-| `client-vX.Y.Z` | OpenUPM 客户端包 |
-| `server-vX.Y.Z` | GHCR 镜像 `bugreport-server:X.Y.Z` |
-| `vX.Y.Z` | 客户端 + 服务端联合发布 |
+| Tag | 触发工作流 | 产物 |
+|-----|------------|------|
+| `client-vX.Y.Z` | release-client | OpenUPM 客户端包 |
+| `server-vX.Y.Z` | release-server | GHCR 镜像 `bugreport-server:X.Y.Z` |
+| `vX.Y.Z` | release-all | 客户端 + 服务端联合发布 |
 
-## 客户端接入
+---
 
-1. 通过 OpenUPM / git URL 安装 `com.setsuodu.bugreport`
-2. 场景中添加 `BugReporter`（菜单：Tools → BugReport → Create BugReporter GameObject）
-3. 配置 Server Base Url、Project Id、Ingest Api Key
+## 快速链接
 
-异常与 `Error`/`Exception` 日志会自动入本地队列并周期性上报。
-
-## 技术要点（服务端）
-
-- Minimal API + `CreateSlimBuilder` + `JsonSerializerContext`（AOT）
-- PostgreSQL + 原生 ADO.NET（Npgsql）+ DbUp 嵌入式迁移
-- 附件：S3 兼容对象存储（MinIO/OSS），接口预留
-- Docker：多阶段 AOT publish → `runtime-deps` chiseled 镜像
-
-## 待办（设计文档）
-
-- GHCR `:latest` 策略
-- Admin API Key 轮换 / 多租户
-- 附件存储选 MinIO 或云 OSS
-- 多副本时将 DbUp 拆为独立迁移 Job
+- [客户端部署指南](docs/client-deployment.md)
+- [服务器部署指南](docs/server-deployment.md)
+- [设计文档 v2](docs/DESIGN-v2.md)
+- [OpenAPI 契约](shared/openapi.yaml)

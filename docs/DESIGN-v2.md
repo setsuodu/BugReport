@@ -1,3 +1,5 @@
+[← 返回文档中心](README.md) | [客户端部署](client-deployment.md) | [服务器部署](server-deployment.md)
+
 # BugReport 服务 设计文档 v2
 
 基于原始需求文档的四大模块拆分,结合以下改版要求重新设计:
