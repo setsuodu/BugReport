@@ -60,6 +60,20 @@ BugReport/
 
 ---
 
+
+## 数据库迁移
+
+迁移已从 API 启动路径拆出，避免多副本竞态。
+
+| 场景 | 命令 |
+|------|------|
+| Compose 只跑迁移 | `cd server && docker compose run --rm bugreport-migrate` |
+| 本地无 Docker | `dotnet run --project server/src/BugReport.Server.Api -- --migrate` |
+| 正常启动 | `cd server && docker compose up -d --build`（自动先 migrate） |
+
+Program.cs 支持 `--migrate` / `RUN_MIGRATION_ONLY=true`：只跑 DbUp 后退出，不启动 Web。  
+规范详见公司 profile 与 [GameTemplate](https://github.com/LongLongGames/GameTemplate)。
+
 ## 发布 Tag 策略
 
 | Tag | 触发工作流 | 产物 |

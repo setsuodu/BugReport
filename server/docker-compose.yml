@@ -67,6 +67,20 @@ services:
         echo "MinIO bucket ready."
         exit 0
 
+  # 一次性迁移 Job（与 bugreport-server 同一镜像，--migrate 后退出）
+  bugreport-migrate:
+    build:
+      context: ..
+      dockerfile: server/src/BugReport.Server.Api/Dockerfile
+    image: bugreport-server:local
+    command: ["--migrate"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Postgres: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+
   bugreport-server:
     build:
       context: ..
@@ -77,6 +91,8 @@ services:
       db:
         condition: service_healthy
       minio-init:
+        condition: service_completed_successfully
+      bugreport-migrate:
         condition: service_completed_successfully
     environment:
       ConnectionStrings__Postgres: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}

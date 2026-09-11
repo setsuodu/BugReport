@@ -28,11 +28,23 @@ services:
     volumes:
       - bugreport_minio:/data
 
+  bugreport-migrate:
+    image: ghcr.io/<org>/bugreport-server:1.0.0
+    command: ["--migrate"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - ConnectionStrings__Postgres=Host=db;Port=5432;Database=bugreport;Username=bugreport;Password=bugreport
+
   bugreport-server:
     image: ghcr.io/<org>/bugreport-server:1.0.0
     depends_on:
       db:
         condition: service_healthy
+      bugreport-migrate:
+        condition: service_completed_successfully
     environment:
       - ConnectionStrings__Postgres=Host=db;Port=5432;Database=bugreport;Username=bugreport;Password=bugreport
       - Storage__Endpoint=http://minio:9000
