@@ -169,7 +169,7 @@ MonoBehaviour:
   nullRefKey: 284
   manualReportKey: 285
   nestedExceptionKey: 286
-  alsoLogInfoOnStart: 1
+  flushKey: 287
 --- !u!114 &313166947
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,11 +182,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28520c6e62b5aa546acf0772ed0cca4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Setsuodu.BugReport::Setsuodu.BugReport.BugReporter
-  serverBaseUrl: http://localhost:8080
-  projectId: default
-  ingestApiKey: 
+  serverBaseUrl: http://localhost:12080
+  projectId: match3
+  ingestApiKey: dev-ingest-key
   captureUnhandled: 1
-  flushIntervalSeconds: 15
+  flushIntervalSeconds: 5
+  debugHttp: 1
+  clearQueueOnAwake: 1
 --- !u!1 &1444524997
 GameObject:
   m_ObjectHideFlags: 0

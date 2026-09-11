@@ -39,7 +39,7 @@ BugReport/
 │       ├── Samples~/
 │       └── Tests/
 ├── server/
-│   ├── BugReport.Server.sln
+│   ├── BugReport.Server.slnx
 │   └── src/
 │       └── BugReport.Server.Api/         # 唯一产物:Docker image,不是类库
 │           ├── BugReport.Server.Api.csproj

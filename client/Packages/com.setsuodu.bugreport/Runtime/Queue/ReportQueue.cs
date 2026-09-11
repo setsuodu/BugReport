@@ -67,6 +67,20 @@ namespace Setsuodu.BugReport.Queue
             }
         }
 
+        public int Clear()
+        {
+            lock (_lock)
+            {
+                if (!Directory.Exists(_dir)) return 0;
+                var files = Directory.GetFiles(_dir, "*.json");
+                foreach (var f in files)
+                {
+                    try { File.Delete(f); } catch { /* ignore */ }
+                }
+                return files.Length;
+            }
+        }
+
         public int Count
         {
             get
