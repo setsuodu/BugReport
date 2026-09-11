@@ -22,7 +22,7 @@ jobs:
           # OpenUPM / UPM expects version in package.json
           python3 -c "
           import json, pathlib
-          p = pathlib.Path('client/com.company.bugreport/package.json')
+          p = pathlib.Path('client/com.setsuodu.bugreport/package.json')
           data = json.loads(p.read_text())
           data['version'] = '${{ steps.ver.outputs.version }}'
           p.write_text(json.dumps(data, indent=2) + '\n')
@@ -31,6 +31,6 @@ jobs:
         env:
           OPENUPM_TOKEN: ${{ secrets.OPENUPM_TOKEN }}
         run: |
-          echo "Submit client/com.company.bugreport path to OpenUPM with tag client-v${{ steps.ver.outputs.version }}"
+          echo "Submit client/com.setsuodu.bugreport path to OpenUPM with tag client-v${{ steps.ver.outputs.version }}"
           echo "Configure OPENUPM_TOKEN and your OpenUPM package submission flow here."
           # Example: openupm-cli or automated PR to openupm/openupm

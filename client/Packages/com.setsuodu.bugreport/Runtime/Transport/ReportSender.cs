@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Text;
-using Company.BugReport.Models;
+using Setsuodu.BugReport.Models;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace Company.BugReport.Transport
+namespace Setsuodu.BugReport.Transport
 {
     public sealed class ReportSender
     {

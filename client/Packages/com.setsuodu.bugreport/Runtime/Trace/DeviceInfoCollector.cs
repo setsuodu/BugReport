@@ -1,7 +1,7 @@
-using Company.BugReport.Models;
+using Setsuodu.BugReport.Models;
 using UnityEngine;
 
-namespace Company.BugReport.Trace
+namespace Setsuodu.BugReport.Trace
 {
     public static class DeviceInfoCollector
     {

@@ -8,15 +8,24 @@
   "documentationUrl": "https://github.com/setsuodu/bugreport",
   "changelogUrl": "https://github.com/setsuodu/bugreport/blob/main/client/com.setsuodu.bugreport/CHANGELOG.md",
   "licensesUrl": "https://github.com/setsuodu/bugreport/blob/main/LICENSE",
+  "license": "MIT",
   "keywords": [
     "bug",
     "crash",
     "report",
-    "telemetry"
+    "telemetry",
+    "exception"
   ],
   "author": {
-    "name": "setsuodu",
-    "email": "setsuodu@gmail.com"
+    "name": "Setsuodu",
+    "url": "https://github.com/setsuodu"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "samples": [
+    {
+      "displayName": "Basic Setup & Error Triggers",
+      "description": "Sample scene scripts that intentionally throw/log errors so you can verify reporting end-to-end. Add BugReporter + ErrorTriggers to a scene and press Play.",
+      "path": "Samples~/BasicSetup"
+    }
+  ]
 }

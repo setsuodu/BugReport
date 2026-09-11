@@ -26,7 +26,7 @@ BugReport/
 │   ├── release-server.yml        # tag: server-vX.Y.Z
 │   └── release-all.yml           # tag: vX.Y.Z (大版本联合发布)
 ├── client/
-│   └── com.company.bugreport/            # Unity UPM 包(OpenUPM 提交时填此子目录路径)
+│   └── com.setsuodu.bugreport/            # Unity UPM 包(OpenUPM 提交时填此子目录路径)
 │       ├── package.json
 │       ├── Runtime/
 │       │   ├── BugReporter.cs

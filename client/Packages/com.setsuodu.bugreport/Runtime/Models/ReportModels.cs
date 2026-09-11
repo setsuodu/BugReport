@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Company.BugReport.Models
+namespace Setsuodu.BugReport.Models
 {
     [Serializable]
     public class DeviceInfo

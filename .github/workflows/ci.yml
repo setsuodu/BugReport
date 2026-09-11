@@ -19,8 +19,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate client package
         run: |
-          test -f client/com.company.bugreport/package.json
-          test -f client/com.company.bugreport/Runtime/BugReporter.cs
+          test -f client/com.setsuodu.bugreport/package.json
+          test -f client/com.setsuodu.bugreport/Runtime/BugReporter.cs
           echo "Client package structure OK"
           # Full Unity Test Runner: wire to game-ci/unity-test-runner when license available.
 

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/BugReport.Server.Api/BugReport.Server.Api.csproj" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

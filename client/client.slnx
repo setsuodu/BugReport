@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Project Path="Setsuodu.BugReport.csproj" />
+  <Project Path="Setsuodu.BugReport.Editor.csproj" />
+  <Project Path="Setsuodu.BugReport.Tests.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+</Solution>

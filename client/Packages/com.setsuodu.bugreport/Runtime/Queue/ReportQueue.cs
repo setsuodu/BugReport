@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Company.BugReport.Models;
+using Setsuodu.BugReport.Models;
 using UnityEngine;
 
-namespace Company.BugReport.Queue
+namespace Setsuodu.BugReport.Queue
 {
     /// <summary>
     /// Simple local persistent queue. Stores one JSON file per pending report under persistentDataPath.

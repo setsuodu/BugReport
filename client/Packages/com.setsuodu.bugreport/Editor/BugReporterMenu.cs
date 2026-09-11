@@ -1,7 +1,8 @@
 using UnityEditor;
 using UnityEngine;
+using Setsuodu.BugReport;
 
-namespace Company.BugReport.Editor
+namespace Setsuodu.BugReport.Editor
 {
     public static class BugReporterMenu
     {

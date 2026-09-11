@@ -1,10 +1,10 @@
-using Company.BugReport.Models;
-using Company.BugReport.Queue;
+using Setsuodu.BugReport.Models;
+using Setsuodu.BugReport.Queue;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace Company.BugReport.Tests
+namespace Setsuodu.BugReport.Tests
 {
     public class ReportQueueTests
     {

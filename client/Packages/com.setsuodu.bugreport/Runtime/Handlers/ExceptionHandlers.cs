@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Company.BugReport.Handlers
+namespace Setsuodu.BugReport.Handlers
 {
     /// <summary>
     /// v1: C# layer only – Application.logMessageReceived + AppDomain.UnhandledException.

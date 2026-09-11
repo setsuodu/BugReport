@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-using Company.BugReport.Handlers;
-using Company.BugReport.Models;
-using Company.BugReport.Queue;
-using Company.BugReport.Trace;
-using Company.BugReport.Transport;
+using Setsuodu.BugReport.Handlers;
+using Setsuodu.BugReport.Models;
+using Setsuodu.BugReport.Queue;
+using Setsuodu.BugReport.Trace;
+using Setsuodu.BugReport.Transport;
 using UnityEngine;
 
-namespace Company.BugReport
+namespace Setsuodu.BugReport
 {
     /// <summary>
     /// Entry point. Attach to a persistent GameObject or call Init from bootstrap.

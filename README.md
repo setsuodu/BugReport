@@ -12,7 +12,7 @@ Unity 客户端上报 + .NET 10 服务端接收/查询的 Bug/Crash 报告服务
 
 ```
 BugReport/
-├── client/com.company.bugreport/   # Unity UPM 包
+├── client/com.setsuodu.bugreport/   # Unity UPM 包
 ├── server/src/BugReport.Server.Api/ # .NET 10 API（AOT）
 ├── shared/openapi.yaml             # 协议唯一事实来源
 ├── deploy/docker-compose.example.yml
@@ -62,7 +62,7 @@ docker compose -f deploy/docker-compose.example.yml up
 
 ## 客户端接入
 
-1. 通过 OpenUPM / git URL 安装 `com.company.bugreport`
+1. 通过 OpenUPM / git URL 安装 `com.setsuodu.bugreport`
 2. 场景中添加 `BugReporter`（菜单：Tools → BugReport → Create BugReporter GameObject）
 3. 配置 Server Base Url、Project Id、Ingest Api Key
 
