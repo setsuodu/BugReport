@@ -6,6 +6,9 @@
 #   API 12080 | Postgres 12032 | MinIO S3 12090 | MinIO Console 12091
 #
 # Secrets live in .env (see .env.example). Do not commit .env.
+#
+# CI note: use quay.io for MinIO/mc — Docker Hub anonymous pulls often
+# fail on GitHub Actions ("pull access denied for minio/minio").
 
 name: bugreport
 
@@ -28,7 +31,8 @@ services:
       retries: 10
 
   minio:
-    image: minio/minio:latest
+    # Prefer Quay (official MinIO publish) to avoid Docker Hub rate-limit in CI
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     restart: unless-stopped
     command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
     environment:
@@ -41,7 +45,7 @@ services:
       - bugreport_minio:/data
 
   minio-init:
-    image: minio/mc:latest
+    image: quay.io/minio/mc:RELEASE.2025-04-16T18-13-26Z
     depends_on:
       - minio
     restart: "no"
