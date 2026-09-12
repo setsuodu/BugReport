@@ -22,8 +22,8 @@
 /Packages/*
 !/Packages/manifest.json
 !/Packages/packages-lock.json
-!/Packages/com.setsuodu.excelconfigcompiler/
-!/Packages/com.setsuodu.excelconfigcompiler/**
+!/Packages/com.setsuodu.bugreport/
+!/Packages/com.setsuodu.bugreport/**
 ~$*
 
 # Never ignore Asset meta data
@@ -74,4 +74,3 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 /Assets/Samples.meta
-!ExcelConfigCompiler.Cli.csproj

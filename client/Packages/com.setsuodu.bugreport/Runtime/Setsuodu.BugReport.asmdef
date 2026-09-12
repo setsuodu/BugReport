@@ -1,0 +1,14 @@
+{
+    "name": "Setsuodu.BugReport",
+    "rootNamespace": "Setsuodu.BugReport",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
