@@ -1,5 +1,4 @@
 using System.Text.Json;
-using BugReport.Server.Api.Json;
 using BugReport.Server.Api.Models;
 using Npgsql;
 using NpgsqlTypes;
@@ -46,10 +45,13 @@ public sealed class PostgresReportStore : IReportStore
         cmd.Parameters.AddWithValue("app_version", (object?)ingest.AppVersion ?? DBNull.Value);
         cmd.Parameters.AddWithValue("occurred_at", ingest.OccurredAt);
 
-        if (ingest.CustomData is { Count: > 0 })
+        // AOT-safe: JsonElement.GetRawText() — never Dictionary<string, object>
+        if (ingest.CustomData is { ValueKind: JsonValueKind.Object or JsonValueKind.Array } je)
         {
-            var json = JsonSerializer.Serialize(ingest.CustomData, AppJsonContext.Default.DictionaryStringObject);
-            cmd.Parameters.Add(new NpgsqlParameter("custom_data", NpgsqlDbType.Jsonb) { Value = json });
+            cmd.Parameters.Add(new NpgsqlParameter("custom_data", NpgsqlDbType.Jsonb)
+            {
+                Value = je.GetRawText()
+            });
         }
         else
         {
@@ -64,7 +66,6 @@ public sealed class PostgresReportStore : IReportStore
         }
         else
         {
-            // ON CONFLICT DO NOTHING returned no row → fetch existing id
             await using var find = conn.CreateCommand();
             find.CommandText = "SELECT id FROM reports WHERE project_id = @p AND client_report_id = @c";
             find.Parameters.AddWithValue("p", ingest.ProjectId);
@@ -251,11 +252,12 @@ public sealed class PostgresReportStore : IReportStore
             };
         }
 
-        Dictionary<string, object>? custom = null;
+        JsonElement? custom = null;
         if (!reader.IsDBNull(14))
         {
             var json = reader.GetString(14);
-            custom = JsonSerializer.Deserialize(json, AppJsonContext.Default.DictionaryStringObject);
+            using var doc = JsonDocument.Parse(json);
+            custom = doc.RootElement.Clone();
         }
 
         return new ReportDetail

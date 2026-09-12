@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace BugReport.Server.Api.Models;
 
 public enum ReportStatus
@@ -34,7 +36,8 @@ public sealed class ReportIngest
     public DeviceInfo? DeviceInfo { get; set; }
     public string? AppVersion { get; set; }
     public DateTimeOffset OccurredAt { get; set; }
-    public Dictionary<string, object>? CustomData { get; set; }
+    /// <summary>AOT-safe: JsonElement instead of Dictionary&lt;string, object&gt;.</summary>
+    public JsonElement? CustomData { get; set; }
     public List<string>? AttachmentIds { get; set; }
 }
 
@@ -97,7 +100,7 @@ public sealed class ReportDetail
     public DateTimeOffset OccurredAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public required string Status { get; set; }
-    public Dictionary<string, object>? CustomData { get; set; }
+    public JsonElement? CustomData { get; set; }
     public List<string>? AttachmentIds { get; set; }
 }
 
@@ -117,4 +120,10 @@ public sealed class StatusUpdateRequest
 public sealed class HealthResponse
 {
     public required string Status { get; set; }
+}
+
+/// <summary>ADR-0002: no anonymous error objects under AOT.</summary>
+public sealed class ErrorResponse
+{
+    public required string Error { get; set; }
 }

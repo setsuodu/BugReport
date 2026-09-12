@@ -1,4 +1,5 @@
 using BugReport.Server.Api.Auth;
+using BugReport.Server.Api.Json;
 using BugReport.Server.Api.Models;
 using BugReport.Server.Api.Storage;
 
@@ -69,7 +70,10 @@ public static class QueryEndpoints
         if (string.IsNullOrWhiteSpace(body.Status) ||
             body.Status is not ("Open" or "Fixed" or "Closed"))
         {
-            return Results.BadRequest(new { error = "status must be Open, Fixed, or Closed" });
+            return Results.Json(
+                new ErrorResponse { Error = "status must be Open, Fixed, or Closed" },
+                AppJsonContext.Default.ErrorResponse,
+                statusCode: StatusCodes.Status400BadRequest);
         }
 
         var report = await store.UpdateStatusAsync(id, body.Status, http.RequestAborted);

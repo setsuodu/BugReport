@@ -1,4 +1,5 @@
 using BugReport.Server.Api.Auth;
+using BugReport.Server.Api.Json;
 using BugReport.Server.Api.Models;
 using BugReport.Server.Api.Storage;
 
@@ -30,7 +31,10 @@ public static class IngestEndpoints
             string.IsNullOrWhiteSpace(body.Level) ||
             string.IsNullOrWhiteSpace(body.Message))
         {
-            return Results.BadRequest(new { error = "projectId, clientReportId, level, message are required" });
+            return Results.Json(
+                new ErrorResponse { Error = "projectId, clientReportId, level, message are required" },
+                AppJsonContext.Default.ErrorResponse,
+                statusCode: StatusCodes.Status400BadRequest);
         }
 
         var reportId = await store.InsertReportAsync(body, http.RequestAborted);
@@ -51,22 +55,19 @@ public static class IngestEndpoints
             string.IsNullOrWhiteSpace(body.FileName) ||
             body.SizeBytes <= 0)
         {
-            return Results.BadRequest(new { error = "projectId, fileName, sizeBytes are required" });
+            return Results.Json(
+                new ErrorResponse { Error = "projectId, fileName, sizeBytes are required" },
+                AppJsonContext.Default.ErrorResponse,
+                statusCode: StatusCodes.Status400BadRequest);
         }
 
-        // Storage key: projectId/yyyy/MM/dd/{guid}_{fileName}
         var attachmentId = Guid.NewGuid();
         var storageKey = $"{body.ProjectId}/{DateTime.UtcNow:yyyy/MM/dd}/{attachmentId}_{SanitizeFileName(body.FileName)}";
 
-        // Persist pending row (use generated id as attachment id by creating then returning)
-        // CreateAttachmentAsync generates its own id; we need consistent id for response.
-        // For simplicity we let store generate and use that.
         var id = await store.CreateAttachmentAsync(body, storageKey, http.RequestAborted);
 
         var endpoint = config["Storage:Endpoint"]?.TrimEnd('/') ?? "http://localhost:9000";
         var bucket = config["Storage:Bucket"] ?? "bugreport-attachments";
-        // Pre-signed style placeholder: clients can PUT to this path when using path-style MinIO/S3.
-        // Production should generate real pre-signed URLs via S3 SDK (kept out of AOT-critical path for v1).
         var uploadUrl = $"{endpoint}/{bucket}/{storageKey}";
         var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
 
@@ -90,7 +91,12 @@ public static class IngestEndpoints
 
         var meta = await store.GetAttachmentMetaAsync(body.AttachmentId, http.RequestAborted);
         if (meta is null)
-            return Results.NotFound(new { error = "attachment not found" });
+        {
+            return Results.Json(
+                new ErrorResponse { Error = "attachment not found" },
+                AppJsonContext.Default.ErrorResponse,
+                statusCode: StatusCodes.Status404NotFound);
+        }
 
         var (projectId, storageKey, status) = meta.Value;
         if (status == "Completed")
@@ -112,7 +118,12 @@ public static class IngestEndpoints
 
         var ok = await store.CompleteAttachmentAsync(body.AttachmentId, body.Etag, finalUrl, http.RequestAborted);
         if (!ok)
-            return Results.Conflict(new { error = "attachment already completed or missing" });
+        {
+            return Results.Json(
+                new ErrorResponse { Error = "attachment already completed or missing" },
+                AppJsonContext.Default.ErrorResponse,
+                statusCode: StatusCodes.Status409Conflict);
+        }
 
         return Results.Ok(new AttachmentCompleteResponse
         {
