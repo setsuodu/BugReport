@@ -5,7 +5,7 @@
   "description": "Client-side bug/crash reporting for Unity. Captures C# exceptions and logs, queues locally, and uploads to BugReport server.",
   "unity": "2022.3",
   "unityRelease": "0f1",
-  "documentationUrl": "https://github.com/setsuodu/bugreport",
+  "documentationUrl": "https://github.com/setsuodu/bugreport/blob/main/client/packages/com.setsuodu.bugreport/README.md",
   "changelogUrl": "https://github.com/setsuodu/bugreport/blob/main/client/packages/com.setsuodu.bugreport/CHANGELOG.md",
   "licensesUrl": "https://github.com/setsuodu/bugreport/blob/main/client/packages/com.setsuodu.bugreport/LICENSE",
   "license": "MIT",

@@ -7,6 +7,8 @@
 #
 # Secrets live in .env (see .env.example). Do not commit .env.
 
+name: bugreport
+
 services:
   db:
     image: postgres:16-alpine
