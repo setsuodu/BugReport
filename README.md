@@ -78,8 +78,8 @@ Program.cs 支持 `--migrate` / `RUN_MIGRATION_ONLY=true`：只跑 DbUp 后退�
 
 | Tag | 触发工作流 | 产物 |
 |-----|------------|------|
-| 不打tag | 外部触发 | OpenUPM 客户端包 |
-| `server-vX.Y.Z` | release-server | GHCR 镜像 `bugreport-server:X.Y.Z` |
+| `com.setsuodu.bugreport/vX.Y.Z` | 外部触发 | OpenUPM 客户端包 |
+| `server/v1.0.0` | release-server | GHCR 镜像 |
 
 ---
 
