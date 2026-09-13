@@ -161,7 +161,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 313166944}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 315f12c0dee89b448863e96e16327c60, type: 3}
+  m_Script: {fileID: 11500000, guid: cc32cbbe7f136814ca5ea063b9be321c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Setsuodu.BugReport.Samples.ErrorTriggers
   logErrorKey: 282
